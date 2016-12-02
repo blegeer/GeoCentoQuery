@@ -21,7 +21,7 @@
  ***************************************************************************/
 """
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, QDate, QUrl
-from PyQt4.QtGui import QAction, QIcon, QTableWidgetItem, QMessageBox
+from PyQt4.QtGui import QAction, QIcon, QTableWidgetItem, QMessageBox,QCalendarWidget
 # Initialize Qt resources from file resources.py
 import resources
 # Import the code for the dialog
@@ -194,7 +194,18 @@ class GeoCentoViewer:
 		
 		# show the dialog
 		self.dlg.show()
-		self.dlg.startDate.setDate(	QDate(11,11,2016))
+		
+		sCalPopup = QCalendarWidget()
+		eCalPopup = QCalendarWidget()
+		self.dlg.startDate.setCalendarPopup(True)
+		self.dlg.startDate.setCalendarWidget(sCalPopup)
+		self.dlg.endDate.setCalendarPopup(True)
+		self.dlg.endDate.setCalendarWidget(eCalPopup)
+		
+		
+		self.dlg.startDate.setDate(	QDate(2016,11,11))
+		self.dlg.endDate.setDate(QDate(2016,11,18))
+		
 		self.dlg.queryTable.setHorizontalHeaderLabels(['providername', 
 			'type',
 			'satellitename',
@@ -271,10 +282,11 @@ class GeoCentoViewer:
 		
 		self.dlg.statusText.setText("Querying: "+aoiWkt)
 		
-		dstart = 1434672000
-		# dstart = ymd2unixtime(r"11/11/2016")
-		dstop = 1440972000
-		# dstop = ymd2unixtime(r"11/18/2016")
+		#dstart = 1434672000
+		dstart = self.dlg.startDate.dateTime().toTime_t()
+		#dstop = 1440972000
+		dstop = self.dlg.endDate.dateTime().toTime_t()
+		
 
 		queryHash = {'sensorFilters':{'maxResolution':maxRes, 'minResolution': minRes}, 
 			'aoiWKT':aoiWkt,  
@@ -296,6 +308,11 @@ class GeoCentoViewer:
 		self.dlg.statusText.setText("Ready")
 		
 		return(rJson)
+		
+	def ymd2unixtime(s):
+		import time
+		import datetime
+		return(time.mktime(datetime.datetime.strptime(s, "%d/%m/%Y").timetuple()))
 		
 	def setTable(self,json):
 		'''
