@@ -220,9 +220,9 @@
   <widget class="QWidget" name="">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>20</y>
-     <width>461</width>
+     <x>21</x>
+     <y>21</y>
+     <width>510</width>
      <height>22</height>
     </rect>
    </property>
@@ -246,6 +246,40 @@
     </item>
     <item>
      <widget class="QDateEdit" name="endDate"/>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_4">
+      <property name="text">
+       <string>Resolution - Min:</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QDoubleSpinBox" name="resMinSpinner">
+      <property name="maximum">
+       <double>30.000000000000000</double>
+      </property>
+      <property name="value">
+       <double>0.300000000000000</double>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_5">
+      <property name="text">
+       <string>Max</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QDoubleSpinBox" name="resMaxSpinner">
+      <property name="maximum">
+       <double>30.000000000000000</double>
+      </property>
+      <property name="value">
+       <double>1.000000000000000</double>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>

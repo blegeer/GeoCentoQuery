@@ -274,8 +274,8 @@ class GeoCentoViewer:
 		apiEndpoint = '/api/search'
 		headers = {'Authorization':'Token '+str(apiKey), 'Content-Type':'application/json'}
 		print(headers)
-		minRes = 0.30
-		maxRes = 1.0
+		minRes = self.dlg.resMinSpinner.value()
+		maxRes = self.dlg.resMaxSpinner.value()
 		aoiWkt = 'POLYGON((40 40, 20 45, 45 30, 40 40))'
 		# this must be in geo - convert?
 		aoiWkt = self.iface.mapCanvas().extent().asWktPolygon()
@@ -292,9 +292,12 @@ class GeoCentoViewer:
 			'aoiWKT':aoiWkt,  
 			'start':dstart, 
 			'stop':dstop}
+	
+		
 		
 		queryData = json.dumps(queryHash)
-
+		print(queryData)
+		
 		url=urlBase+apiEndpoint
 		print (url)
 		data = urllib.urlencode(queryHash)
