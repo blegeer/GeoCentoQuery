@@ -21,7 +21,7 @@
  ***************************************************************************/
 """
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, QDate, QUrl
-from PyQt4.QtGui import QAction, QIcon, QTableWidgetItem, QMessageBox,QCalendarWidget
+from PyQt4.QtGui import QAction, QIcon, QTableWidgetItem, QAbstractItemView, QMessageBox, QCalendarWidget
 # Initialize Qt resources from file resources.py
 import resources
 # Import the code for the dialog
@@ -206,6 +206,7 @@ class GeoCentoViewer:
 		self.dlg.startDate.setDate(	QDate(2016,11,11))
 		self.dlg.endDate.setDate(QDate(2016,11,18))
 		
+		self.dlg.queryTable.setSelectionBehavior(QAbstractItemView.SelectRows)
 		self.dlg.queryTable.setHorizontalHeaderLabels(['providername', 
 			'type',
 			'satellitename',
@@ -230,26 +231,29 @@ class GeoCentoViewer:
 			print("Goodbye")
 		
 	def tableClicked(self, item1, item2):
+	
 		# print item1, item2
+		print("Selection: "+str(item1)+' '+str(item2))
 		selected = self.json["products"][item1]
 		
 		coords = selected["coordinatesWKT"]
 		gem = QgsGeometry.fromWkt(coords)
-		layer =  QgsVectorLayer('Polygon?crs=epsg:4326', selected["productId"] , "memory")
+		layer =  QgsVectorLayer('Polygon?crs=epsg:4326', selected["satelliteName"]+":"+selected["productId"] , "memory")
 		pr = layer.dataProvider() 
 		poly=QgsFeature()
 		poly.setGeometry(gem)
+		layer.setLayerTransparency(40)
 		
 		pr.addFeatures([poly])
 		layer.updateExtents()
 		QgsMapLayerRegistry.instance().addMapLayers([layer])
 		
-		print "Thumbnail "+selected["thumbnail"]
+		# print "Thumbnail "+selected["thumbnail"]
 		
-		print "QL: "+selected["ql"]
-		overlayLayer = QgsRasterLayer(selected["ql"], selected["productId"], "wms")
-		overlayLayer.isValid()
-		QgsMapLayerRegistry.instance().addMapLayer(overlayLayer)
+		# print "QL: "+selected["ql"]
+		# overlayLayer = QgsRasterLayer(selected["ql"], selected["productId"], "wms")
+		# overlayLayer.isValid()
+		# QgsMapLayerRegistry.instance().addMapLayer(overlayLayer)
 		
 		
 			
@@ -269,7 +273,10 @@ class GeoCentoViewer:
 			print("API KEY is not provided")
 			return None
 		
-		
+		#if (self.iface.mapCanvas().currentLayer().crs().srsid() != 4326):
+		#	print("WARNING CRS is not geographic - setting to geographic")
+		#	self.iface.mapCanvas().currentLayer().setCrs(QgsCoordinateReferenceSystem(4326, True))
+			
 		urlBase = 'https://earthimages.geocento.com'
 		apiEndpoint = '/api/search'
 		headers = {'Authorization':'Token '+str(apiKey), 'Content-Type':'application/json'}
