@@ -30,6 +30,7 @@ import os.path
 import json
 import urllib
 import urllib2
+from qgis.gui import QgsMessageBar
 from qgis.core import *
 
 
@@ -206,7 +207,7 @@ class GeoCentoViewer:
 		self.dlg.startDate.setDate(	QDate(2016,11,11))
 		self.dlg.endDate.setDate(QDate(2016,11,18))
 		
-		self.dlg.queryTable.setSelectionBehavior(QAbstractItemView.SelectRows)
+		# self.dlg.queryTable.setSelectionBehavior(QAbstractItemView.SelectRows)
 		self.dlg.queryTable.setHorizontalHeaderLabels(['providername', 
 			'type',
 			'satellitename',
@@ -232,7 +233,7 @@ class GeoCentoViewer:
 		
 	def tableClicked(self, item1, item2):
 	
-		# print item1, item2
+		
 		print("Selection: "+str(item1)+' '+str(item2))
 		selected = self.json["products"][item1]
 		
@@ -271,9 +272,14 @@ class GeoCentoViewer:
 		
 		if (not apiKey):
 			print("API KEY is not provided")
+			self.iface.messageBar().pushMessage("No API Key Provided for GeoCento Query", level=QgsMessageBar.CRITICAL)
 			return None
 		
-		#if (self.iface.mapCanvas().currentLayer().crs().srsid() != 4326):
+		if (self.iface.mapCanvas().currentLayer() == None):
+			QMessageBox.information( self.iface.mapCanvas(), "NO LAYER", "No Layer Selected")
+			return None
+			
+		
 		#	print("WARNING CRS is not geographic - setting to geographic")
 		#	self.iface.mapCanvas().currentLayer().setCrs(QgsCoordinateReferenceSystem(4326, True))
 			
@@ -285,7 +291,14 @@ class GeoCentoViewer:
 		maxRes = self.dlg.resMaxSpinner.value()
 		aoiWkt = 'POLYGON((40 40, 20 45, 45 30, 40 40))'
 		# this must be in geo - convert?
-		aoiWkt = self.iface.mapCanvas().extent().asWktPolygon()
+		
+		curExtent = self.iface.mapCanvas().extent()
+		
+		if (self.iface.mapCanvas().currentLayer().crs().srsid() != 4326):
+			curExtent = self.convertExtentToGeographic(curExtent, self.iface.mapCanvas().currentLayer().crs().authid(), 4326)
+			print "Conversion to Geographic"
+				
+		aoiWkt = curExtent.asWktPolygon()
 		
 		self.dlg.statusText.setText("Querying: "+aoiWkt)
 		
@@ -324,6 +337,17 @@ class GeoCentoViewer:
 		import datetime
 		return(time.mktime(datetime.datetime.strptime(s, "%d/%m/%Y").timetuple()))
 		
+	def convertExtentToGeographic(self,extent,from_crs,to_crs):
+		crsSrc = QgsCoordinateReferenceSystem(from_crs)
+		crsDest = QgsCoordinateReferenceSystem(to_crs)		
+		xform = QgsCoordinateTransform(crsSrc, crsDest)
+		
+		min_pt = xform.transform(QgsPoint(extent.xMinimum(),extent.yMinimum()))
+		max_pt = xform.transform(QgsPoint(extent.xMaximum(),extent.yMaximum()))
+		
+		return QgsRectangle(xmin=min_pt.x(), ymin=min_pt.y(), xmax=max_pt.x(), ymax=max_pt.y())
+		
+	
 	def setTable(self,json):
 		'''
 		['providername', 

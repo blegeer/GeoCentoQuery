@@ -16,7 +16,7 @@
   <widget class="QDialogButtonBox" name="button_box">
    <property name="geometry">
     <rect>
-     <x>170</x>
+     <x>610</x>
      <y>630</y>
      <width>341</width>
      <height>32</height>
@@ -34,8 +34,8 @@
     <rect>
      <x>20</x>
      <y>70</y>
-     <width>941</width>
-     <height>511</height>
+     <width>931</width>
+     <height>521</height>
     </rect>
    </property>
    <property name="rowCount">
@@ -172,7 +172,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>590</y>
+     <y>600</y>
      <width>75</width>
      <height>23</height>
     </rect>
@@ -184,9 +184,9 @@
   <widget class="QLabel" name="statusText">
    <property name="geometry">
     <rect>
-     <x>30</x>
-     <y>650</y>
-     <width>541</width>
+     <x>20</x>
+     <y>640</y>
+     <width>771</width>
      <height>16</height>
     </rect>
    </property>
@@ -198,7 +198,7 @@
    <property name="geometry">
     <rect>
      <x>170</x>
-     <y>590</y>
+     <y>600</y>
      <width>441</width>
      <height>20</height>
     </rect>
@@ -208,7 +208,7 @@
    <property name="geometry">
     <rect>
      <x>120</x>
-     <y>590</y>
+     <y>600</y>
      <width>46</width>
      <height>21</height>
     </rect>
@@ -220,9 +220,9 @@
   <widget class="QWidget" name="">
    <property name="geometry">
     <rect>
-     <x>21</x>
-     <y>21</y>
-     <width>510</width>
+     <x>20</x>
+     <y>30</y>
+     <width>631</width>
      <height>22</height>
     </rect>
    </property>
@@ -250,7 +250,7 @@
     <item>
      <widget class="QLabel" name="label_4">
       <property name="text">
-       <string>Resolution - Min:</string>
+       <string>Resolution (m)  - Min:</string>
       </property>
      </widget>
     </item>
@@ -267,7 +267,7 @@
     <item>
      <widget class="QLabel" name="label_5">
       <property name="text">
-       <string>Max</string>
+       <string>Max:</string>
       </property>
      </widget>
     </item>
@@ -293,8 +293,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>610</x>
+     <y>630</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -309,12 +309,76 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>610</x>
+     <y>630</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
      <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>resMinSpinner</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>queryButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>462</x>
+     <y>41</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>70</x>
+     <y>605</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>resMaxSpinner</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>queryButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>605</x>
+     <y>43</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>53</x>
+     <y>606</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>endDate</sender>
+   <signal>dateChanged(QDate)</signal>
+   <receiver>queryButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>276</x>
+     <y>36</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>61</x>
+     <y>604</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>startDate</sender>
+   <signal>dateChanged(QDate)</signal>
+   <receiver>queryButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>108</x>
+     <y>39</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>78</x>
+     <y>603</y>
     </hint>
    </hints>
   </connection>
