@@ -20,8 +20,10 @@
  *                                                                         *
  ***************************************************************************/
 """
-from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, QDate, QUrl
-from PyQt4.QtGui import QAction, QIcon, QTableWidgetItem, QAbstractItemView, QMessageBox, QCalendarWidget
+from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, QDate, QUrl, Qt
+from PyQt4.QtGui import QAction, QIcon, QTableWidgetItem, QAbstractItemView, QMessageBox, QCalendarWidget, QDialog
+from PyQt4.QtWebKit import QWebView 
+
 # Initialize Qt resources from file resources.py
 import resources
 # Import the code for the dialog
@@ -30,6 +32,9 @@ import os.path
 import json
 import urllib
 import urllib2
+
+import GeoCentoThumbnail
+
 from qgis.gui import QgsMessageBar
 from qgis.core import *
 
@@ -70,6 +75,8 @@ class GeoCentoViewer:
 		# TODO: We are going to let the user set this up in a future iteration
 		self.toolbar = self.iface.addToolBar(u'GeoCentoViewer')
 		self.toolbar.setObjectName(u'GeoCentoViewer')
+		
+		self.displayedIDs = []
 		
 		# self.iface.mapCanvas().extentsChanged.connect(self.mapExtentsChanged)
 		
@@ -231,11 +238,26 @@ class GeoCentoViewer:
 			# substitute with your code.
 			print("Goodbye")
 		
+	def showThumbnail(self, record):
+		d = QDialog()
+		webView = QWebView(d)
+		webView.setGeometry(300,300,300,300)
+		webView.load(QUrl(record["thumbnail"]))
+		d.setWindowTitle("Thumbnail: "+record["satelliteName"]+":"+record["productId"])
+		d.setWindowModality(Qt.ApplicationModal)
+		d.exec_()
+	  
 	def tableClicked(self, item1, item2):
+	
 	
 		
 		print("Selection: "+str(item1)+' '+str(item2))
 		selected = self.json["products"][item1]
+		if (selected["productId"] in self.displayedIDs):
+			print(str(selected["productId"])+" already selected")
+			return
+			
+		self.displayedIDs.append(selected["productId"])
 		
 		coords = selected["coordinatesWKT"]
 		gem = QgsGeometry.fromWkt(coords)
@@ -248,6 +270,8 @@ class GeoCentoViewer:
 		pr.addFeatures([poly])
 		layer.updateExtents()
 		QgsMapLayerRegistry.instance().addMapLayers([layer])
+		print(selected)
+		self.showThumbnail(selected)
 		
 		# print "Thumbnail "+selected["thumbnail"]
 		
@@ -255,6 +279,13 @@ class GeoCentoViewer:
 		# overlayLayer = QgsRasterLayer(selected["ql"], selected["productId"], "wms")
 		# overlayLayer.isValid()
 		# QgsMapLayerRegistry.instance().addMapLayer(overlayLayer)
+		
+		# GeoCentoThumbnailView = QMainWindow()
+		
+		# ui = GeoCentoThumbnail.Ui_GeoCentoThumbnailView()
+		# ui.setupUi(GeoCentoThumbnailView)
+		# GeoCentoThumbnailView.show()
+		# ui.thumbnailWebView.load(QUrl(selected["thumbnail"]))
 		
 		
 			
@@ -272,7 +303,7 @@ class GeoCentoViewer:
 		
 		if (not apiKey):
 			print("API KEY is not provided")
-			self.iface.messageBar().pushMessage("No API Key Provided for GeoCento Query", level=QgsMessageBar.CRITICAL)
+			self.iface.messageBar().pushMessage("No API Key Provided for GeoCento Query", level=QgsMessageBar.WARNING)
 			return None
 		
 		if (self.iface.mapCanvas().currentLayer() == None):
@@ -349,6 +380,9 @@ class GeoCentoViewer:
 		
 	
 	def setTable(self,json):
+	
+		import datetime 
+		
 		'''
 		['providername', 
 			'type',
@@ -365,16 +399,29 @@ class GeoCentoViewer:
 		nProducts = len(json["products"])
 		rowNum=0
 		for p in json["products"]:
-			self.dlg.queryTable.setItem(rowNum, 0, QTableWidgetItem(p["providerName"]))
+		
+			theDate = datetime.datetime.fromtimestamp(p["start"]/1000.0)
+			if ("selectionPrice" in p):
+				thePrice = str(p["selectionPrice"]["value"])+p["selectionPrice"]["currency"]
+			else:
+				thePrice = "Open Data"
+			
+			if ("providerName" in p):
+				theProvider = p["providerName"]
+			else:
+				theProvider = "Unknown"
+				print(p)
+				
+			self.dlg.queryTable.setItem(rowNum, 0, QTableWidgetItem(theProvider))
 			self.dlg.queryTable.setItem(rowNum, 1, QTableWidgetItem(p["type"]))
 			self.dlg.queryTable.setItem(rowNum, 2, QTableWidgetItem(p["satelliteName"]))
 			self.dlg.queryTable.setItem(rowNum, 3, QTableWidgetItem(p["instrumentName"]))
 			self.dlg.queryTable.setItem(rowNum, 4, QTableWidgetItem(p["sensorType"]))
 			self.dlg.queryTable.setItem(rowNum, 5, QTableWidgetItem(p["sensorBand"]))
-			self.dlg.queryTable.setItem(rowNum, 6, QTableWidgetItem(str(p["sensorResolution"])))
-			self.dlg.queryTable.setItem(rowNum, 7, QTableWidgetItem(str(p["start"])))
-			self.dlg.queryTable.setItem(rowNum, 8, QTableWidgetItem(str(p["aoiCoveragePercent"])))
-			self.dlg.queryTable.setItem(rowNum, 9, QTableWidgetItem(str(p["selectionPrice"])))
+			self.dlg.queryTable.setItem(rowNum, 6, QTableWidgetItem(str(p["sensorResolution"])+"m"))
+			self.dlg.queryTable.setItem(rowNum, 7, QTableWidgetItem(str(theDate)))
+			self.dlg.queryTable.setItem(rowNum, 8, QTableWidgetItem(str(p["aoiCoveragePercent"]*100.0)+"%"))
+			self.dlg.queryTable.setItem(rowNum, 9, QTableWidgetItem(thePrice))
 			rowNum=rowNum+1
 
 			
